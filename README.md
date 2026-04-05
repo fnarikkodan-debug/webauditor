@@ -4,103 +4,41 @@ A comprehensive web auditing tool that helps analyze web pages for accessibility
 
 ## Architecture
 
-```mermaid
-graph TB
-    subgraph Client["Frontend (Vue.js)"]
-        UI[Dashboard / UI]
-        AuditForm[Audit Form]
-        Reports[Reports & History]
-        Export[Export Module]
-    end
-
-    subgraph Gateway["API Gateway (Node.js / Express)"]
-        REST[REST API]
-        Auth[Auth Middleware\nJWT + bcrypt]
-        RateLimit[Rate Limiter]
-    end
-
-    subgraph AuditEngine["Audit Engine (Node.js)"]
-        Accessibility[Accessibility Auditor\naxe-core / pa11y]
-        Performance[Performance Auditor\nLighthouse API]
-        SEO[SEO Auditor\nCheerio]
-        Security[Security Auditor\nHeaders / CSP / HTTPS]
-        Mobile[Mobile Responsiveness\nPuppeteer / Playwright]
-        CrossBrowser[Cross-Browser Checker\ncaniuse data]
-    end
-
-    subgraph AI["AI Layer"]
-        AIInsights[AI Insights Engine\nClaude / OpenAI API]
-        Recommendations[Recommendations Generator]
-    end
-
-    subgraph Integrations["Google Integrations"]
-        GA[Google Analytics API]
-        GSC[Google Search Console API]
-        GTM[Google Tag Manager API]
-        GAds[Google Ads API]
-    end
-
-    subgraph Notifications["Notification Service"]
-        Email[Email Service\nNodemailer / SendGrid]
-    end
-
-    subgraph Reporting["Reporting Service"]
-        PDF[PDF Generator\npuppeteer / pdfkit]
-        Excel[Excel Generator\nexceljs]
-        CSV[CSV Exporter]
-    end
-
-    subgraph DB["Database (MongoDB)"]
-        Users[(Users)]
-        Audits[(Audit Results)]
-        History[(Audit History)]
-        Config[(Configurations)]
-    end
-
-    subgraph HeadlessBrowser["Headless Browser"]
-        Puppeteer[Puppeteer / Playwright]
-    end
-
-    UI --> REST
-    AuditForm --> REST
-    Reports --> REST
-    Export --> REST
-
-    REST --> Auth
-    Auth --> RateLimit
-    RateLimit --> AuditEngine
-    RateLimit --> Reporting
-    RateLimit --> Integrations
-
-    AuditEngine --> Accessibility
-    AuditEngine --> Performance
-    AuditEngine --> SEO
-    AuditEngine --> Security
-    AuditEngine --> Mobile
-    AuditEngine --> CrossBrowser
-
-    Mobile --> Puppeteer
-    Performance --> Puppeteer
-
-    AuditEngine --> AIInsights
-    AIInsights --> Recommendations
-
-    AuditEngine --> DB
-    Auth --> Users
-    AuditEngine --> Audits
-    Audits --> History
-
-    Reporting --> PDF
-    Reporting --> Excel
-    Reporting --> CSV
-
-    AuditEngine --> Notifications
-    Notifications --> Email
-
-    Integrations --> GA
-    Integrations --> GSC
-    Integrations --> GTM
-    Integrations --> GAds
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                      Frontend (Vue.js)                          │
+│   Dashboard / UI  │  Audit Form  │  Reports & History  │ Export │
+└──────────────────────────────┬──────────────────────────────────┘
+                               │ HTTP
+┌──────────────────────────────▼──────────────────────────────────┐
+│                  API Gateway (Node.js / Express)                 │
+│          REST API  │  JWT Auth Middleware  │  Rate Limiter       │
+└──────┬──────────────────────────────────────────┬───────────────┘
+       │                                          │
+┌──────▼───────────────────────────┐   ┌──────────▼──────────────┐
+│         Audit Engine             │   │   Google Integrations    │
+│  ┌─────────────────────────┐     │   │  Analytics │ Search      │
+│  │ Accessibility (axe-core)│     │   │  Console   │ Tag Manager │
+│  │ Performance (Lighthouse)│     │   │  Ads                     │
+│  │ SEO (Cheerio)           │     │   └─────────────────────────┘
+│  │ Security (Headers/CSP)  │     │
+│  │ Mobile (Puppeteer)      │     │   ┌──────────────────────────┐
+│  │ Cross-Browser (caniuse) │     │   │    Reporting Service     │
+│  └─────────────────────────┘     │   │  PDF │ Excel │ CSV       │
+└──────┬──────────────┬────────────┘   └──────────────────────────┘
+       │              │
+┌──────▼──────┐  ┌────▼──────────────────────────┐
+│  AI Layer   │  │       Database (MongoDB)        │
+│  Claude /   │  │  Users │ Audits │ History │     │
+│  OpenAI API │  │  Configurations                 │
+│  Insights & │  └─────────────────────────────────┘
+│  Recs       │
+└─────────────┘
+       │
+┌──────▼──────────────┐
+│ Notification Service│
+│ Nodemailer/SendGrid │
+└─────────────────────┘
 ```
 
 ## Tech Stack
